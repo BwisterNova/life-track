@@ -1,0 +1,25 @@
+.formContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.placeholder {
+  margin: 0;
+  color: #374151;
+}
+
+.closeBtn {
+  align-self: flex-start;
+  background: transparent;
+  border: 1px solid #e5e7eb;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+}
+
+@media (max-width: 420px) {
+  .formContainer {
+    gap: 0.5rem;
+  }
+}

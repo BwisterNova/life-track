@@ -1,0 +1,82 @@
+.mainContent {
+  margin: 0 auto;
+  padding: 1rem 2rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.headerTitle h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  background: linear-gradient(
+    to right,
+    var(--color-blue-600),
+    var(--color-purple-600)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.headerTitle p {
+  color: #6b7280;
+  margin-top: 0.5rem;
+}
+
+.headerIcons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.iconButton {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  border: 1px solid #e5e7eb;
+  background: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  color: #374151;
+}
+
+.iconButton:hover {
+  transform: scale(1.05);
+}
+
+.notificationDot {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--color-red-500);
+  border-radius: 9999px;
+}
+
+.premiumButton {
+  background: linear-gradient(
+    to right,
+    var(--color-yellow-400),
+    var(--color-orange-500)
+  );
+  border: none;
+  color: var(--color-white);
+}
+
+.premiumButton:hover {
+  background: linear-gradient(
+    to right,
+    var(--color-yellow-500),
+    var(--color-orange-600)
+  );
+}

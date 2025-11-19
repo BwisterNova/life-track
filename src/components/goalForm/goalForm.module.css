@@ -1,0 +1,239 @@
+.formContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.placeholder {
+  margin: 0;
+  color: #374151;
+}
+
+.closeBtn {
+  align-self: flex-start;
+  background: transparent;
+  border: 1px solid #e5e7eb;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+}
+
+@media (max-width: 420px) {
+  .formContainer {
+    gap: 0.5rem;
+  }
+}
+
+/* New form styles */
+.label {
+  display: block;
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 0.25rem;
+}
+
+.input {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  outline: none;
+  font-size: 1rem;
+}
+
+.textarea {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  outline: none;
+  font-size: 0.95rem;
+}
+
+.row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.dropdownWrapper {
+  position: relative;
+  flex: 1 1 0;
+}
+
+.dropdown {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  background: var(--color-white);
+}
+
+.dropdownValue {
+  color: #111827;
+  font-weight: 600;
+}
+
+.arrow {
+  margin-left: 0.5rem;
+  transition: transform 0.15s;
+}
+
+.arrow.open {
+  transform: rotate(180deg);
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--color-white);
+  border: 1px solid #e6e9ef;
+  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.06);
+  border-radius: 0.5rem;
+  margin-top: 0.5rem;
+  z-index: 80;
+  overflow: hidden;
+}
+
+.dropdownItem {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0.55rem 0.75rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.dropdownItem:hover {
+  background: #f8fafc;
+}
+
+.check {
+  color: var(--color-blue-600);
+}
+
+.deadlineWrapper {
+  flex: 0 0 220px;
+}
+
+.dateInputWrapper {
+  position: relative;
+}
+
+.dateInput {
+  width: 100%;
+  padding: 0.55rem 2.5rem 0.55rem 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+}
+
+.calendarIcon {
+  position: absolute;
+  right: 0.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.iconGrid {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.4rem;
+}
+
+.iconBtn {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s, border-color 0.12s;
+}
+
+.iconBtn:hover {
+  transform: scale(1.06);
+}
+
+.selected {
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.06);
+  transform: scale(1.08);
+}
+
+.iconEmoji {
+  font-size: 1.15rem;
+}
+
+.colorGrid {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.colorSwatch {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.12s, border-color 0.12s;
+}
+
+.colorSwatch:hover {
+  transform: scale(1.06);
+}
+
+.selectedColor {
+  border-color: #111827;
+  transform: scale(1.08);
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.saveBtn {
+  background: linear-gradient(
+    90deg,
+    var(--color-blue-600),
+    var(--color-purple-600)
+  );
+  color: var(--color-white);
+  padding: 0.6rem 0.9rem;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.cancelBtn {
+  background: transparent;
+  border: 1px solid #e5e7eb;
+  padding: 0.6rem 0.9rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .row {
+    flex-direction: column;
+  }
+
+  .deadlineWrapper {
+    flex: 1 1 0;
+  }
+}
