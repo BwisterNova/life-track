@@ -25,22 +25,22 @@ export default function Home() {
         </div>
 
         <div className={styles.headerIcons}>
-          <button className={styles.iconButton}>
-            <Bell />
-            <span className={styles.notificationDot}></span>
-          </button>
-
           <button className={`${styles.iconButton} ${styles.premiumButton}`}>
             <Crown />
           </button>
 
           <button className={styles.iconButton}>
+            <Bell />
+            <span className={styles.notificationDot}></span>
+          </button>
+
+          {/* <button className={styles.iconButton}>
             <Settings />
           </button>
 
           <button className={styles.iconButton} onClick={toggleDarkmode}>
             {darkMode ? <Sun /> : <Moon />}
-          </button>
+          </button> */}
         </div>
       </motion.div>
 

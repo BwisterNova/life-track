@@ -1,0 +1,180 @@
+📋 PAGE CONTENT PLAN
+1. 🏠 Dashboard (Current Page)
+Purpose: Overview of everything at a glance
+
+Contains:
+
+Stats widgets (Total Goals, Completion Rate, Current Streaks, Weekly Progress)
+Tabs for Goals and Habits
+Recent activity feed
+Quick add buttons
+Motivational quote/tip of the day
+
+2. 🎯 Goals Page
+Purpose: Dedicated goals management
+
+Contains:
+
+Filter/Sort Options:
+By category (Personal, Work, Health, Finance, etc.)
+By status (In Progress, Completed, Overdue)
+By deadline (This Week, This Month, This Year)
+View Modes:
+Grid view (cards)
+List view (compact)
+Kanban board (To Do, In Progress, Done)
+Bulk Actions: Delete multiple, mark as complete
+Search bar to find specific goals
+Goal templates (pre-made goal structures)
+Archive section for completed goals
+3. 📅 Habits Page
+Purpose: Focus on daily habit tracking
+
+Contains:
+
+Habit List: All active habits with today's status
+Quick Check-In: One-click to mark today's habits
+Habit Calendar View: Monthly heatmap showing completion patterns
+Streak Leaderboard: Habits sorted by longest streaks
+Habit Categories: Morning routine, Evening routine, Fitness, Learning, etc.
+Habit Templates: Popular habits to add (Drink water, Exercise, Read, Meditate)
+Habit History: Past 30/60/90 days view
+Reminder Settings: Set notification times for each habit
+
+4. 📊 Analytics Page
+Purpose: Deep insights and data visualization
+
+Contains:
+
+Goal Analytics:
+Completion rate over time (line chart)
+Goals by category (pie chart)
+Average time to complete goals
+Success rate by goal type
+Habit Analytics:
+Habit completion heatmap (GitHub-style)
+Best/worst performing habits
+Streak trends
+Weekly/monthly consistency score
+Time Analysis:
+Most productive days of the week
+Best time of day for habit completion
+Comparison Charts:
+This month vs last month
+Year-over-year progress
+Export Data: Download reports as PDF/CSV
+
+5. 📈 Progress Page
+Purpose: Visual journey and milestones
+
+Contains:
+
+Timeline View:
+Chronological list of all completed goals
+Milestone markers (10 goals, 30-day streak, etc.)
+Celebration moments with confetti animations
+Achievement Badges:
+"First Goal Completed"
+"7-Day Streak Master"
+"30 Goals Completed"
+"Consistency Champion"
+Progress Photos/Notes: Attach images and reflections
+Yearly Review: Summary of the year's achievements
+Goal vs Habit Balance: Visual showing focus areas
+Motivational Stats:
+Total days tracked
+Total goals completed
+Longest streak ever
+Current momentum score
+
+6. 👑 Premium Page
+Purpose: Upgrade to unlock features
+
+Contains:
+
+Feature Comparison Table: Free vs Premium
+Premium Features:
+Unlimited goals/habits (Free: 10 each)
+Advanced analytics and reports
+Custom categories and tags
+Goal collaboration (share with friends/family)
+Priority support
+Dark mode themes (multiple color schemes)
+Export/Import data
+Habit reminders and notifications
+AI-powered goal suggestions
+Pricing Plans: Monthly, Yearly (with discount)
+Testimonials: Success stories from premium users
+Money-back guarantee
+Payment options
+
+7. ⚙️ Settings Page
+Purpose: Customize app experience
+
+Contains:
+
+Appearance:
+Theme selection (Light, Dark, Auto)
+Color scheme picker
+Font size adjustment
+Notifications:
+Enable/disable notifications
+Reminder times for habits
+Goal deadline alerts
+Streak milestone notifications
+Data Management:
+Export all data
+Import data from file
+Clear all data (with confirmation)
+Backup to cloud
+Categories:
+Create custom categories
+Edit/delete categories
+Assign colors to categories
+Preferences:
+Start of week (Sunday/Monday)
+Date format
+Language selection
+About:
+App version
+Privacy policy
+Terms of service
+Contact support
+
+8. 👤 Account Page
+Purpose: User profile and account management
+
+Contains:
+
+Profile Section:
+Profile picture upload
+Display name
+Bio/motivation quote
+Join date
+Account Stats:
+Total goals created
+Total habits tracked
+Days active
+Account level/rank
+Login/Security:
+Email address
+Change password
+Two-factor authentication
+Connected accounts (Google, Apple)
+Subscription:
+Current plan (Free/Premium)
+Billing history
+Manage subscription
+Cancel subscription
+Danger Zone:
+Delete account (with confirmation)
+Logout button
+🎨 Design Consistency Across Pages:
+Same header with page title and breadcrumbs
+Consistent card styling
+Same color scheme (blue-purple gradient)
+Smooth page transitions
+Mobile-responsive layouts
+Empty states with helpful messages
+Loading skeletons for data fetching
+This plan gives each page a clear purpose and unique value. Ready to start building these pages? Let me know which one you'd like to tackle first! 🚀

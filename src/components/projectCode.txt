@@ -1,0 +1,1940 @@
+	// GOALFORM
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Goal } from '@/types/goals';
+import { useState, useEffect } from 'react';
+import { format } from 'date-fns';
+
+interface GoalFormProps {
+  open: boolean;
+  onClose: () => void;
+  onSave: (goal: Partial<Goal>) => void;
+  goal?: Goal;
+}
+
+const CATEGORIES = ['Personal', 'Career', 'Health', 'Finance', 'Learning', 'Other'];
+const COLORS = ['#60A5FA', '#34D399', '#A78BFA', '#F472B6', '#FBBF24', '#F87171'];
+const ICONS = ['🎯', '💼', '💪', '💰', '📚', '🎨', '🏃', '🧘', '🎵', '✈️'];
+
+export const GoalForm = ({ open, onClose, onSave, goal }: GoalFormProps) => {
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    category: 'Personal',
+    deadline: format(new Date(), 'yyyy-MM-dd'),
+    color: COLORS[0],
+    icon: ICONS[0],
+  });
+
+  useEffect(() => {
+    if (goal) {
+      setFormData({
+        title: goal.title,
+        description: goal.description || '',
+        category: goal.category,
+        deadline: format(goal.deadline, 'yyyy-MM-dd'),
+        color: goal.color,
+        icon: goal.icon,
+      });
+    } else {
+      setFormData({
+        title: '',
+        description: '',
+        category: 'Personal',
+        deadline: format(new Date(), 'yyyy-MM-dd'),
+        color: COLORS[0],
+        icon: ICONS[0],
+      });
+    }
+  }, [goal, open]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave({
+      ...formData,
+      deadline: new Date(formData.deadline),
+    });
+    onClose();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>{goal ? 'Edit Goal' : 'Create New Goal'}</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="title">Title</Label>
+            <Input
+              id="title"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              placeholder="Enter goal title"
+              required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="description">Description (Optional)</Label>
+            <Textarea
+              id="description"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Add more details about your goal"
+              rows={3}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="category">Category</Label>
+              <Select
+                value={formData.category}
+                onValueChange={(value) => setFormData({ ...formData, category: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORIES.map((cat) => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="deadline">Deadline</Label>
+              <Input
+                id="deadline"
+                type="date"
+                value={formData.deadline}
+                onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label>Icon</Label>
+            <div className="flex gap-2 flex-wrap mt-2">
+              {ICONS.map((icon) => (
+                <button
+                  key={icon}
+                  type="button"
+                  onClick={() => setFormData({ ...formData, icon })}
+                  className={`w-10 h-10 rounded-lg flex items-center justify-center text-xl transition-all ${
+                    formData.icon === icon
+                      ? 'ring-2 ring-primary scale-110'
+                      : 'hover:scale-105 bg-secondary'
+                  }`}
+                >
+                  {icon}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <Label>Color</Label>
+            <div className="flex gap-2 mt-2">
+              {COLORS.map((color) => (
+                <button
+                  key={color}
+                  type="button"
+                  onClick={() => setFormData({ ...formData, color })}
+                  className={`w-10 h-10 rounded-lg transition-all ${
+                    formData.color === color ? 'ring-2 ring-offset-2 ring-primary scale-110' : 'hover:scale-105'
+                  }`}
+                  style={{ backgroundColor: color }}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="flex gap-2 pt-4">
+            <Button type="button" variant="outline" onClick={onClose} className="flex-1">
+              Cancel
+            </Button>
+            <Button type="submit" className="flex-1">
+              {goal ? 'Save Changes' : 'Create Goal'}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+	// GOAL CARD
+import { Goal } from '@/types/goals';
+import { motion } from 'framer-motion';
+import { Calendar, Edit, Trash2, CheckCircle2 } from 'lucide-react';
+import { format } from 'date-fns';
+import styles from './GoalCard.module.css';
+
+interface GoalCardProps {
+  goal: Goal;
+  onEdit: (goal: Goal) => void;
+  onDelete: (id: string) => void;
+  onComplete: (id: string) => void;
+  onUpdateProgress: (id: string, progress: number) => void;
+}
+
+export const GoalCard = ({
+  goal,
+  onEdit,
+  onDelete,
+  onComplete,
+  onUpdateProgress,
+}: GoalCardProps) => {
+  const getStatusClass = () => {
+    switch (goal.status) {
+      case 'completed':
+        return styles.completed;
+      case 'overdue':
+        return styles.overdue;
+      default:
+        return styles.inProgress;
+    }
+  };
+
+  const getStatusText = () => {
+    switch (goal.status) {
+      case 'completed':
+        return 'Completed';
+      case 'overdue':
+        return 'Overdue';
+      default:
+        return 'In Progress';
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.2 }}
+    >
+      <div className={styles.card}>
+        <div className={styles.cardHeader}>
+          <div className={styles.cardInfo}>
+            <div
+              className={styles.iconContainer}
+              style={{ backgroundColor: `${goal.color}20` }}
+            >
+              {goal.icon}
+            </div>
+            <div className={styles.cardTitle}>
+              <h3>{goal.title}</h3>
+              <span className={styles.badge}>{goal.category}</span>
+            </div>
+          </div>
+          <div className={styles.cardActions}>
+            <button
+              onClick={() => onEdit(goal)}
+              className={styles.actionButton}
+            >
+              <Edit className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => onDelete(goal.id)}
+              className={`${styles.actionButton} ${styles.deleteButton}`}
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+
+        {goal.description && (
+          <p className={styles.description}>
+            {goal.description}
+          </p>
+        )}
+
+        <div className={styles.progressSection}>
+          <div className={styles.progressHeader}>
+            <span className={styles.progressLabel}>Progress</span>
+            <span className={styles.progressValue}>{goal.progress}%</span>
+          </div>
+          <div className={styles.progressBar}>
+            <div
+              className={styles.progressFill}
+              style={{ width: `${goal.progress}%` }}
+            />
+          </div>
+
+          <div className={styles.cardFooter}>
+            <div className={styles.deadline}>
+              <Calendar className="h-4 w-4" />
+              <span>{format(goal.deadline, 'MMM dd, yyyy')}</span>
+            </div>
+            <span className={`${styles.statusBadge} ${getStatusClass()}`}>
+              {getStatusText()}
+            </span>
+          </div>
+        </div>
+
+        {goal.status !== 'completed' && (
+          <div className={styles.buttonGroup}>
+            <button
+              className={styles.progressButton}
+              onClick={() =>
+                onUpdateProgress(goal.id, Math.min(goal.progress + 10, 100))
+              }
+            >
+              +10%
+            </button>
+            {goal.progress === 100 && (
+              <button
+                className={styles.completeButton}
+                onClick={() => onComplete(goal.id)}
+              >
+                <CheckCircle2 className="h-4 w-4" />
+                Mark Complete
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+};
+
+.card {
+  padding: 1.5rem;
+  background: var(--color-white);
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+  color: #111827;
+}
+
+.dark .card {
+  background: #374151;
+  color: #f9fafb;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.cardInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.iconContainer {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.cardTitle h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: #111827;
+}
+
+.dark .cardTitle h3 {
+  color: #f9fafb;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  background: #f3f4f6;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-top: 0.25rem;
+  color: #374151;
+}
+
+.dark .badge {
+  background: #1f2937;
+  color: #d1d5db;
+}
+
+.cardActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.actionButton {
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  background: transparent;
+  border-radius: 0.375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+  color: #6b7280;
+}
+
+.dark .actionButton {
+  color: #9ca3af;
+}
+
+.actionButton:hover {
+  background: #f3f4f6;
+}
+
+.dark .actionButton:hover {
+  background: #1f2937;
+}
+
+.deleteButton {
+  color: #ef4444;
+}
+
+.description {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 1rem;
+}
+
+.dark .description {
+  color: #9ca3af;
+}
+
+.progressSection {
+  margin-top: 1rem;
+}
+
+.progressHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.progressLabel {
+  color: #6b7280;
+}
+
+.dark .progressLabel {
+  color: #9ca3af;
+}
+
+.progressValue {
+  font-weight: 600;
+  color: #111827;
+}
+
+.dark .progressValue {
+  color: #f9fafb;
+}
+
+.progressBar {
+  width: 100%;
+  height: 0.5rem;
+  background: #e5e7eb;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.dark .progressBar {
+  background: #1f2937;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(to right, var(--color-blue-600), var(--color-purple-600));
+  transition: width 0.3s;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.deadline {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.dark .deadline {
+  color: #9ca3af;
+}
+
+.statusBadge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-white);
+}
+
+.statusBadge.completed {
+  background: #10b981;
+}
+
+.statusBadge.overdue {
+  background: #ef4444;
+}
+
+.statusBadge.inProgress {
+  background: var(--color-blue-600);
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.progressButton {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #e5e7eb;
+  background: var(--color-white);
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #374151;
+}
+
+.dark .progressButton {
+  border-color: #1f2937;
+  background: #1f2937;
+  color: #d1d5db;
+}
+
+.progressButton:hover {
+  background: #f9fafb;
+}
+
+.dark .progressButton:hover {
+  background: #111827;
+}
+
+.completeButton {
+  flex: 1;
+  padding: 0.5rem;
+  background: var(--color-blue-600);
+  color: var(--color-white);
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: background 0.2s;
+}
+
+.completeButton:hover {
+  background: #1d4ed8;
+}
+
+	// HABITFORM
+
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Habit } from '@/types/goals';
+import { useState, useEffect } from 'react';
+
+interface HabitFormProps {
+  open: boolean;
+  onClose: () => void;
+  onSave: (habit: Partial<Habit>) => void;
+  habit?: Habit;
+}
+
+const COLORS = ['#60A5FA', '#34D399', '#A78BFA', '#F472B6', '#FBBF24', '#F87171'];
+const ICONS = ['💪', '🏃', '📚', '🧘', '💧', '🥗', '😴', '✍️', '🎵', '🎨'];
+
+export const HabitForm = ({ open, onClose, onSave, habit }: HabitFormProps) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    frequency: 'daily' as 'daily' | 'weekly',
+    color: COLORS[0],
+    icon: ICONS[0],
+  });
+
+  useEffect(() => {
+    if (habit) {
+      setFormData({
+        name: habit.name,
+        description: habit.description || '',
+        frequency: habit.frequency,
+        color: habit.color,
+        icon: habit.icon,
+      });
+    } else {
+      setFormData({
+        name: '',
+        description: '',
+        frequency: 'daily',
+        color: COLORS[0],
+        icon: ICONS[0],
+      });
+    }
+  }, [habit, open]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(formData);
+    onClose();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>{habit ? 'Edit Habit' : 'Create New Habit'}</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="name">Habit Name</Label>
+            <Input
+              id="name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="Enter habit name"
+              required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="description">Description (Optional)</Label>
+            <Textarea
+              id="description"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Add more details about your habit"
+              rows={3}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="frequency">Frequency</Label>
+            <Select
+              value={formData.frequency}
+              onValueChange={(value: 'daily' | 'weekly') =>
+                setFormData({ ...formData, frequency: value })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="daily">Daily</SelectItem>
+                <SelectItem value="weekly">Weekly</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label>Icon</Label>
+            <div className="flex gap-2 flex-wrap mt-2">
+              {ICONS.map((icon) => (
+                <button
+                  key={icon}
+                  type="button"
+                  onClick={() => setFormData({ ...formData, icon })}
+                  className={`w-10 h-10 rounded-lg flex items-center justify-center text-xl transition-all ${
+                    formData.icon === icon
+                      ? 'ring-2 ring-primary scale-110'
+                      : 'hover:scale-105 bg-secondary'
+                  }`}
+                >
+                  {icon}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <Label>Color</Label>
+            <div className="flex gap-2 mt-2">
+              {COLORS.map((color) => (
+                <button
+                  key={color}
+                  type="button"
+                  onClick={() => setFormData({ ...formData, color })}
+                  className={`w-10 h-10 rounded-lg transition-all ${
+                    formData.color === color ? 'ring-2 ring-offset-2 ring-primary scale-110' : 'hover:scale-105'
+                  }`}
+                  style={{ backgroundColor: color }}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="flex gap-2 pt-4">
+            <Button type="button" variant="outline" onClick={onClose} className="flex-1">
+              Cancel
+            </Button>
+            <Button type="submit" className="flex-1">
+              {habit ? 'Save Changes' : 'Create Habit'}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+	// HABITCARD
+import { Habit } from '@/types/goals';
+import { motion } from 'framer-motion';
+import { Flame, Edit, Trash2, Check } from 'lucide-react';
+import { format, isToday } from 'date-fns';
+import styles from './HabitCard.module.css';
+
+interface HabitCardProps {
+  habit: Habit;
+  onEdit: (habit: Habit) => void;
+  onDelete: (id: string) => void;
+  onToggleComplete: (id: string, date: string) => void;
+}
+
+export const HabitCard = ({
+  habit,
+  onEdit,
+  onDelete,
+  onToggleComplete,
+}: HabitCardProps) => {
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const isCompletedToday = habit.completedDates.includes(today);
+
+  const getLastSevenDays = () => {
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      days.push(date);
+    }
+    return days;
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.2 }}
+    >
+      <div className={styles.card}>
+        <div className={styles.cardHeader}>
+          <div className={styles.cardInfo}>
+            <div
+              className={styles.iconContainer}
+              style={{ backgroundColor: `${habit.color}20` }}
+            >
+              {habit.icon}
+            </div>
+            <div className={styles.cardTitle}>
+              <h3>{habit.name}</h3>
+              <span className={styles.badge}>{habit.frequency}</span>
+            </div>
+          </div>
+          <div className={styles.cardActions}>
+            <button
+              onClick={() => onEdit(habit)}
+              className={styles.actionButton}
+            >
+              <Edit className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => onDelete(habit.id)}
+              className={`${styles.actionButton} ${styles.deleteButton}`}
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+
+        {habit.description && (
+          <p className={styles.description}>
+            {habit.description}
+          </p>
+        )}
+
+        <div className={styles.streakContainer}>
+          <Flame className={`h-5 w-5 ${styles.streakIcon}`} />
+          <span className={styles.streakNumber}>{habit.streak}</span>
+          <span className={styles.streakText}>day streak</span>
+        </div>
+
+        <div className={styles.daysGrid}>
+          {getLastSevenDays().map((date) => {
+            const dateStr = format(date, 'yyyy-MM-dd');
+            const isCompleted = habit.completedDates.includes(dateStr);
+            const isTodayDate = isToday(date);
+
+            const cellClass = isCompleted
+              ? styles.completed
+              : isTodayDate
+              ? styles.today
+              : styles.default;
+
+            return (
+              <div
+                key={dateStr}
+                className={`${styles.dayCell} ${cellClass}`}
+              >
+                <div className={styles.dayName}>{format(date, 'EEE')}</div>
+                <div className={styles.dayNumber}>{format(date, 'd')}</div>
+                {isCompleted && <Check className={styles.checkIcon} />}
+              </div>
+            );
+          })}
+        </div>
+
+        <button
+          className={`${styles.completeButton} ${isCompletedToday ? styles.outline : styles.primary}`}
+          onClick={() => onToggleComplete(habit.id, today)}
+        >
+          {isCompletedToday ? 'Undo Today' : 'Complete Today'}
+        </button>
+      </div>
+    </motion.div>
+  );
+};
+
+.card {
+  padding: 1.5rem;
+  background: var(--color-white);
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+  color: #111827;
+}
+
+.dark .card {
+  background: #374151;
+  color: #f9fafb;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.cardInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.iconContainer {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.cardTitle h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: #111827;
+}
+
+.dark .cardTitle h3 {
+  color: #f9fafb;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  background: #f3f4f6;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-top: 0.25rem;
+  text-transform: capitalize;
+  color: #374151;
+}
+
+.dark .badge {
+  background: #1f2937;
+  color: #d1d5db;
+}
+
+.cardActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.actionButton {
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  background: transparent;
+  border-radius: 0.375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+  color: #6b7280;
+}
+
+.dark .actionButton {
+  color: #9ca3af;
+}
+
+.actionButton:hover {
+  background: #f3f4f6;
+}
+
+.dark .actionButton:hover {
+  background: #1f2937;
+}
+
+.deleteButton {
+  color: #ef4444;
+}
+
+.description {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 1rem;
+}
+
+.dark .description {
+  color: #9ca3af;
+}
+
+.streakContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.streakIcon {
+  color: #f97316;
+}
+
+.streakNumber {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.dark .streakNumber {
+  color: #f9fafb;
+}
+
+.streakText {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.dark .streakText {
+  color: #9ca3af;
+}
+
+.daysGrid {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.dayCell {
+  flex: 1;
+  aspect-ratio: 1;
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  transition: all 0.2s;
+}
+
+.dayCell.completed {
+  background: #10b981;
+  color: var(--color-white);
+}
+
+.dayCell.today {
+  background: #dbeafe;
+  border: 2px solid var(--color-blue-600);
+  color: #1e3a8a;
+}
+
+.dark .dayCell.today {
+  background: #1e3a8a;
+  color: #dbeafe;
+}
+
+.dayCell.default {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.dark .dayCell.default {
+  background: #1f2937;
+  color: #9ca3af;
+}
+
+.dayName {
+  font-weight: 500;
+}
+
+.dayNumber {
+  font-size: 0.625rem;
+}
+
+.checkIcon {
+  width: 0.75rem;
+  height: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.completeButton {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.completeButton.primary {
+  background: var(--color-blue-600);
+  color: var(--color-white);
+}
+
+.completeButton.primary:hover {
+  background: #1d4ed8;
+}
+
+.completeButton.outline {
+  background: var(--color-white);
+  color: #374151;
+  border: 1px solid #e5e7eb;
+}
+
+.dark .completeButton.outline {
+  background: #1f2937;
+  color: #d1d5db;
+  border-color: #1f2937;
+}
+
+.completeButton.outline:hover {
+  background: #f9fafb;
+}
+
+.dark .completeButton.outline:hover {
+  background: #111827;
+}
+
+	// DASHBOARD
+import { useState, useEffect } from 'react';
+import { Goal, Habit, DashboardStats } from '@/types/goals';
+import { storageService } from '@/lib/storage';
+import { StatsWidget } from '@/components/StatsWidget';
+import { GoalCard } from '@/components/GoalCard';
+import { HabitCard } from '@/components/HabitCard';
+import { GoalForm } from '@/components/GoalForm';
+import { HabitForm } from '@/components/HabitForm';
+import { Confetti } from '@/components/Confetti';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Plus, Moon, Sun, Bell, Settings, Crown, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useToast } from '@/components/ui/use-toast';
+import { Toaster } from '@/components/ui/toaster';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { format, differenceInDays } from 'date-fns';
+import { sampleGoals, sampleHabits } from '@/lib/sampleData';
+import styles from './Dashboard.module.css';
+
+export default function Dashboard() {
+  const [goals, setGoals] = useState<Goal[]>([]);
+  const [habits, setHabits] = useState<Habit[]>([]);
+  const [stats, setStats] = useState<DashboardStats>({
+    totalGoals: 0,
+    completedGoals: 0,
+    completionRate: 0,
+    currentStreak: 0,
+    weeklyProgress: [],
+    monthlyProgress: [],
+  });
+  const [goalFormOpen, setGoalFormOpen] = useState(false);
+  const [habitFormOpen, setHabitFormOpen] = useState(false);
+  const [editingGoal, setEditingGoal] = useState<Goal | undefined>();
+  const [editingHabit, setEditingHabit] = useState<Habit | undefined>();
+  const [deleteDialog, setDeleteDialog] = useState<{ type: 'goal' | 'habit'; id: string } | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+  const [showAnnouncementBar, setShowAnnouncementBar] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    loadData();
+    const isDark = localStorage.getItem('darkMode') === 'true';
+    setDarkMode(isDark);
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    }
+
+    // Check if user is logged in
+    const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    setIsLoggedIn(loggedIn);
+    setShowAnnouncementBar(!loggedIn);
+  }, []);
+
+  useEffect(() => {
+    calculateStats();
+  }, [goals, habits]);
+
+  const loadData = () => {
+    const loadedGoals = storageService.getGoals();
+    const loadedHabits = storageService.getHabits();
+
+    // Load sample data on first visit
+    if (loadedGoals.length === 0 && loadedHabits.length === 0) {
+      const hasVisited = localStorage.getItem('hasVisited');
+      if (!hasVisited) {
+        storageService.saveGoals(sampleGoals);
+        storageService.saveHabits(sampleHabits);
+        localStorage.setItem('hasVisited', 'true');
+        setGoals(sampleGoals);
+        setHabits(sampleHabits);
+        return;
+      }
+    }
+
+    // Update goal statuses
+    const updatedGoals = loadedGoals.map((goal) => {
+      if (goal.progress === 100 && goal.status !== 'completed') {
+        return { ...goal, status: 'completed' as const };
+      }
+      if (new Date(goal.deadline) < new Date() && goal.status !== 'completed') {
+        return { ...goal, status: 'overdue' as const };
+      }
+      return goal;
+    });
+
+    setGoals(updatedGoals);
+    setHabits(loadedHabits);
+  };
+
+  const calculateStats = () => {
+    const completedGoals = goals.filter((g) => g.status === 'completed').length;
+    const completionRate = goals.length > 0 ? Math.round((completedGoals / goals.length) * 100) : 0;
+
+    // Calculate longest current streak across all habits
+    const currentStreak = habits.reduce((max, habit) => Math.max(max, habit.streak), 0);
+
+    setStats({
+      totalGoals: goals.length,
+      completedGoals,
+      completionRate,
+      currentStreak,
+      weeklyProgress: [],
+      monthlyProgress: [],
+    });
+  };
+
+  const toggleDarkMode = () => {
+    const newMode = !darkMode;
+    setDarkMode(newMode);
+    localStorage.setItem('darkMode', String(newMode));
+    if (newMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  };
+
+  const handleSaveGoal = (goalData: Partial<Goal>) => {
+    if (editingGoal) {
+      const updatedGoals = goals.map((g) =>
+        g.id === editingGoal.id ? { ...g, ...goalData } : g
+      );
+      setGoals(updatedGoals);
+      storageService.saveGoals(updatedGoals);
+      toast({ title: 'Goal updated successfully!' });
+    } else {
+      const newGoal: Goal = {
+        id: Date.now().toString(),
+        title: goalData.title!,
+        description: goalData.description,
+        category: goalData.category!,
+        progress: 0,
+        deadline: goalData.deadline!,
+        status: 'in-progress',
+        color: goalData.color!,
+        icon: goalData.icon!,
+        createdAt: new Date(),
+      };
+      const updatedGoals = [...goals, newGoal];
+      setGoals(updatedGoals);
+      storageService.saveGoals(updatedGoals);
+      toast({ title: 'Goal created successfully!' });
+    }
+    setEditingGoal(undefined);
+  };
+
+  const handleSaveHabit = (habitData: Partial<Habit>) => {
+    if (editingHabit) {
+      const updatedHabits = habits.map((h) =>
+        h.id === editingHabit.id ? { ...h, ...habitData } : h
+      );
+      setHabits(updatedHabits);
+      storageService.saveHabits(updatedHabits);
+      toast({ title: 'Habit updated successfully!' });
+    } else {
+      const newHabit: Habit = {
+        id: Date.now().toString(),
+        name: habitData.name!,
+        description: habitData.description,
+        frequency: habitData.frequency!,
+        color: habitData.color!,
+        icon: habitData.icon!,
+        streak: 0,
+        completedDates: [],
+        createdAt: new Date(),
+      };
+      const updatedHabits = [...habits, newHabit];
+      setHabits(updatedHabits);
+      storageService.saveHabits(updatedHabits);
+      toast({ title: 'Habit created successfully!' });
+    }
+    setEditingHabit(undefined);
+  };
+
+  const handleUpdateProgress = (id: string, progress: number) => {
+    const updatedGoals = goals.map((g) => {
+      if (g.id === id) {
+        const newStatus = progress === 100 ? 'completed' : g.status;
+        return { ...g, progress, status: newStatus };
+      }
+      return g;
+    });
+    setGoals(updatedGoals);
+    storageService.saveGoals(updatedGoals);
+
+    if (progress === 100) {
+      setShowConfetti(true);
+      toast({ title: '🎉 Goal completed!', description: 'Congratulations on your achievement!' });
+    }
+  };
+
+  const handleCompleteGoal = (id: string) => {
+    const updatedGoals = goals.map((g) =>
+      g.id === id ? { ...g, status: 'completed' as const, progress: 100 } : g
+    );
+    setGoals(updatedGoals);
+    storageService.saveGoals(updatedGoals);
+    setShowConfetti(true);
+    toast({ title: '🎉 Goal completed!', description: 'Congratulations on your achievement!' });
+  };
+
+  const handleToggleHabitComplete = (id: string, date: string) => {
+    const updatedHabits = habits.map((h) => {
+      if (h.id === id) {
+        const isCompleted = h.completedDates.includes(date);
+        let newCompletedDates: string[];
+        let newStreak = h.streak;
+
+        if (isCompleted) {
+          newCompletedDates = h.completedDates.filter((d) => d !== date);
+          newStreak = Math.max(0, h.streak - 1);
+        } else {
+          newCompletedDates = [...h.completedDates, date].sort();
+          // Calculate new streak
+          const sortedDates = newCompletedDates.sort().reverse();
+          newStreak = 1;
+          for (let i = 0; i < sortedDates.length - 1; i++) {
+            const diff = differenceInDays(new Date(sortedDates[i]), new Date(sortedDates[i + 1]));
+            if (diff === 1) {
+              newStreak++;
+            } else {
+              break;
+            }
+          }
+        }
+
+        return { ...h, completedDates: newCompletedDates, streak: newStreak };
+      }
+      return h;
+    });
+    setHabits(updatedHabits);
+    storageService.saveHabits(updatedHabits);
+
+    const habit = updatedHabits.find((h) => h.id === id);
+    if (habit && !habit.completedDates.includes(date)) {
+      if (habit.streak % 7 === 0 && habit.streak > 0) {
+        toast({
+          title: '🔥 Milestone reached!',
+          description: `${habit.streak} day streak! Keep it up!`
+        });
+      }
+    }
+  };
+
+  const handleDeleteGoal = (id: string) => {
+    const updatedGoals = goals.filter((g) => g.id !== id);
+    setGoals(updatedGoals);
+    storageService.saveGoals(updatedGoals);
+    toast({ title: 'Goal deleted' });
+    setDeleteDialog(null);
+  };
+
+  const handleDeleteHabit = (id: string) => {
+    const updatedHabits = habits.filter((h) => h.id !== id);
+    setHabits(updatedHabits);
+    storageService.saveHabits(updatedHabits);
+    toast({ title: 'Habit deleted' });
+    setDeleteDialog(null);
+  };
+
+  const handleNotificationClick = () => {
+    toast({ title: 'Notifications', description: 'Coming soon!' });
+  };
+
+  const handleSettingsClick = () => {
+    toast({ title: 'Settings', description: 'Coming soon!' });
+  };
+
+  const handlePremiumClick = () => {
+    toast({ title: 'Premium Features', description: 'Upgrade to unlock premium features!' });
+  };
+
+  const handleLoginClick = () => {
+    // Simulate login - will be replaced with actual auth later
+    localStorage.setItem('isLoggedIn', 'true');
+    setIsLoggedIn(true);
+    setShowAnnouncementBar(false);
+    toast({ title: 'Login page coming soon!' });
+  };
+
+  return (
+    <div className={`${styles.container} ${darkMode ? styles.dark : ''}`}>
+      <Toaster />
+      <AnimatePresence>
+        {showConfetti && <Confetti onComplete={() => setShowConfetti(false)} />}
+      </AnimatePresence>
+
+      {/* Announcement Bar */}
+      <AnimatePresence>
+        {showAnnouncementBar && !isLoggedIn && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className={styles.announcementBar}
+          >
+            <div className={styles.announcementContent}>
+              <div className={styles.announcementText}>
+                <p>
+                  🎯 Create an account or login to save your progress across devices!
+                </p>
+              </div>
+              <div className={styles.announcementActions}>
+                <button
+                  onClick={handleLoginClick}
+                  className={styles.loginButton}
+                >
+                  Login / Sign Up
+                </button>
+                <button
+                  onClick={() => setShowAnnouncementBar(false)}
+                  className={styles.closeButton}
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className={styles.mainContent}>
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={styles.header}
+        >
+          <div className={styles.headerTitle}>
+            <h1>Life Goals & Habits</h1>
+            <p>Track your progress and build better habits</p>
+          </div>
+
+          <div className={styles.headerActions}>
+            <button
+              onClick={handleNotificationClick}
+              className={styles.iconButton}
+            >
+              <Bell className="h-5 w-5" />
+              <span className={styles.notificationDot}></span>
+            </button>
+
+            <button
+              onClick={handlePremiumClick}
+              className={`${styles.iconButton} ${styles.premiumButton}`}
+            >
+              <Crown className="h-5 w-5" />
+            </button>
+
+            <button
+              onClick={handleSettingsClick}
+              className={styles.iconButton}
+            >
+              <Settings className="h-5 w-5" />
+            </button>
+
+            <button
+              onClick={toggleDarkMode}
+              className={styles.iconButton}
+            >
+              {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </button>
+          </div>
+        </motion.div>
+
+        <div className={styles.statsSection}>
+          <StatsWidget stats={stats} />
+        </div>
+
+        <Tabs defaultValue="goals" className={styles.tabsContainer}>
+          <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsTrigger value="goals">Goals</TabsTrigger>
+            <TabsTrigger value="habits">Habits</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="goals" className="space-y-4">
+            <div className={styles.sectionHeader}>
+              <h2>Your Goals</h2>
+              <button onClick={() => setGoalFormOpen(true)} className={styles.addButton}>
+                <Plus className="h-4 w-4" />
+                Add Goal
+              </button>
+            </div>
+
+            {goals.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className={styles.emptyState}
+              >
+                <p>No goals yet. Create your first goal to get started!</p>
+                <button onClick={() => setGoalFormOpen(true)} className={styles.addButton}>
+                  <Plus className="h-4 w-4" />
+                  Create Goal
+                </button>
+              </motion.div>
+            ) : (
+              <div className={styles.grid}>
+                <AnimatePresence>
+                  {goals.map((goal) => (
+                    <GoalCard
+                      key={goal.id}
+                      goal={goal}
+                      onEdit={(g) => {
+                        setEditingGoal(g);
+                        setGoalFormOpen(true);
+                      }}
+                      onDelete={(id) => setDeleteDialog({ type: 'goal', id })}
+                      onComplete={handleCompleteGoal}
+                      onUpdateProgress={handleUpdateProgress}
+                    />
+                  ))}
+                </AnimatePresence>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="habits" className="space-y-4">
+            <div className={styles.sectionHeader}>
+              <h2>Your Habits</h2>
+              <button onClick={() => setHabitFormOpen(true)} className={styles.addButton}>
+                <Plus className="h-4 w-4" />
+                Add Habit
+              </button>
+            </div>
+
+            {habits.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className={styles.emptyState}
+              >
+                <p>No habits yet. Create your first habit to start tracking!</p>
+                <button onClick={() => setHabitFormOpen(true)} className={styles.addButton}>
+                  <Plus className="h-4 w-4" />
+                  Create Habit
+                </button>
+              </motion.div>
+            ) : (
+              <div className={styles.grid}>
+                <AnimatePresence>
+                  {habits.map((habit) => (
+                    <HabitCard
+                      key={habit.id}
+                      habit={habit}
+                      onEdit={(h) => {
+                        setEditingHabit(h);
+                        setHabitFormOpen(true);
+                      }}
+                      onDelete={(id) => setDeleteDialog({ type: 'habit', id })}
+                      onToggleComplete={handleToggleHabitComplete}
+                    />
+                  ))}
+                </AnimatePresence>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      <GoalForm
+        open={goalFormOpen}
+        onClose={() => {
+          setGoalFormOpen(false);
+          setEditingGoal(undefined);
+        }}
+        onSave={handleSaveGoal}
+        goal={editingGoal}
+      />
+
+      <HabitForm
+        open={habitFormOpen}
+        onClose={() => {
+          setHabitFormOpen(false);
+          setEditingHabit(undefined);
+        }}
+        onSave={handleSaveHabit}
+        habit={editingHabit}
+      />
+
+      <AlertDialog
+        open={deleteDialog !== null}
+        onOpenChange={() => setDeleteDialog(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete this{' '}
+              {deleteDialog?.type}.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (deleteDialog?.type === 'goal') {
+                  handleDeleteGoal(deleteDialog.id);
+                } else if (deleteDialog?.type === 'habit') {
+                  handleDeleteHabit(deleteDialog.id);
+                }
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}
+
+:root {
+  --color-blue-50: #eff6ff;
+  --color-purple-50: #faf5ff;
+  --color-pink-50: #fdf2f8;
+  --color-blue-600: #2563eb;
+  --color-purple-600: #9333ea;
+  --color-yellow-400: #facc15;
+  --color-orange-500: #f97316;
+  --color-yellow-500: #eab308;
+  --color-orange-600: #ea580c;
+  --color-gray-900: #111827;
+  --color-gray-800: #1f2937;
+  --color-gray-700: #374151;
+  --color-white: #ffffff;
+  --color-red-500: #ef4444;
+}
+
+.container {
+  min-height: 100vh;
+  background: linear-gradient(
+    to bottom right,
+    var(--color-blue-50),
+    var(--color-purple-50),
+    var(--color-pink-50)
+  );
+  transition: background 0.3s;
+}
+
+.dark {
+  background: linear-gradient(
+    to bottom right,
+    var(--color-gray-900),
+    var(--color-gray-800),
+    var(--color-gray-900)
+  );
+}
+
+.announcementBar {
+  background: linear-gradient(
+    to right,
+    var(--color-blue-600),
+    var(--color-purple-600)
+  );
+  color: var(--color-white);
+}
+
+.announcementContent {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.announcementText {
+  flex: 1;
+  text-align: center;
+}
+
+.announcementText p {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+@media (min-width: 768px) {
+  .announcementText p {
+    font-size: 1rem;
+  }
+}
+
+.announcementActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.loginButton {
+  background: var(--color-white);
+  color: var(--color-blue-600);
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.loginButton:hover {
+  background: #f3f4f6;
+}
+
+.closeButton {
+  background: transparent;
+  color: var(--color-white);
+  border: none;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.closeButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.mainContent {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.headerTitle h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  background: linear-gradient(
+    to right,
+    var(--color-blue-600),
+    var(--color-purple-600)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.headerTitle p {
+  color: #6b7280;
+  margin-top: 0.5rem;
+}
+
+.dark .headerTitle p {
+  color: #9ca3af;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.iconButton {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  border: 1px solid #e5e7eb;
+  background: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  color: #374151;
+}
+
+.dark .iconButton {
+  border-color: #4b5563;
+  background: #374151;
+  color: #d1d5db;
+}
+
+.iconButton:hover {
+  transform: scale(1.05);
+}
+
+.notificationDot {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--color-red-500);
+  border-radius: 9999px;
+}
+
+.premiumButton {
+  background: linear-gradient(
+    to right,
+    var(--color-yellow-400),
+    var(--color-orange-500)
+  );
+  border: none;
+  color: var(--color-white);
+}
+
+.premiumButton:hover {
+  background: linear-gradient(
+    to right,
+    var(--color-yellow-500),
+    var(--color-orange-600)
+  );
+}
+
+.statsSection {
+  margin-bottom: 2rem;
+}
+
+.tabsContainer {
+  margin-top: 1.5rem;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.sectionHeader h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.dark .sectionHeader h2 {
+  color: #f9fafb;
+}
+
+.addButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--color-blue-600);
+  color: var(--color-white);
+  border: none;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.addButton:hover {
+  background: #1d4ed8;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 4rem 0;
+}
+
+.emptyState p {
+  color: #6b7280;
+  font-size: 1.125rem;
+  margin-bottom: 1rem;
+}
+
+.dark .emptyState p {
+  color: #9ca3af;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+	// CONFETTI
+import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+
+export const Confetti = ({ onComplete }: { onComplete?: () => void }) => {
+  const [particles] = useState(() =>
+    Array.from({ length: 50 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      delay: Math.random() * 0.5,
+      duration: 2 + Math.random() * 1,
+      rotation: Math.random() * 360,
+      color: ['#60A5FA', '#34D399', '#A78BFA', '#F472B6', '#FBBF24'][
+        Math.floor(Math.random() * 5)
+      ],
+    }))
+  );
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onComplete?.();
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [onComplete]);
+
+  return (
+    <div className="fixed inset-0 pointer-events-none z-50">
+      {particles.map((particle) => (
+        <motion.div
+          key={particle.id}
+          className="absolute w-2 h-2 rounded-full"
+          style={{
+            left: `${particle.x}%`,
+            top: '-10px',
+            backgroundColor: particle.color,
+          }}
+          initial={{ y: 0, opacity: 1, rotate: 0 }}
+          animate={{
+            y: window.innerHeight + 100,
+            opacity: 0,
+            rotate: particle.rotation,
+          }}
+          transition={{
+            duration: particle.duration,
+            delay: particle.delay,
+            ease: 'easeIn',
+          }}
+        />
+      ))}
+    </div>
+  );
+};
