@@ -77,11 +77,12 @@
 }
 
 .addButton {
-  background: linear-gradient(
+  /* background: linear-gradient(
     90deg,
     var(--color-blue-600),
     var(--color-purple-600)
-  );
+  ); */
+  background: var(--color-blue-600);
   color: var(--color-white);
   border: 1px solid #e5e7eb;
   padding: 1rem 1rem;
@@ -111,11 +112,12 @@
 
 .primaryButton {
   align-self: flex-start; /* keep create button left-aligned */
-  background: linear-gradient(
+  /* background: linear-gradient(
     90deg,
     var(--color-blue-600),
     var(--color-purple-600)
-  );
+  ); */
+  background: var(--color-blue-600);
   color: var(
     --color-white
   ); /* requirement: use var(--color-white) for active/primary */
@@ -155,7 +157,7 @@
 .modalBackdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -165,14 +167,14 @@
 
 .modal {
   width: 100%;
-  max-width: 680px;
+  max-width: 500px;
   background: var(--color-white);
   border-radius: 0.5rem;
   box-shadow: 0 12px 40px rgba(2, 6, 23, 0.2);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  max-height: 80vh; /* allow scrolling inside modal */
+  /* max-height: 80vh; allow scrolling inside modal */
 }
 
 .modalHeader {
@@ -199,7 +201,8 @@
 }
 
 .modalBody {
-  padding: 1rem 1.25rem;
+  padding: 0 1.5rem;
+  padding-bottom: 1.5rem;
   overflow-y: auto; /* allow scroll inside modal when content is tall */
 }
 

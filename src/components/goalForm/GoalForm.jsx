@@ -41,9 +41,9 @@ export default function GoalForm({ onClose }) {
 
   return (
     <form className={styles.formContainer} onSubmit={handleSubmit}>
-      <div className={styles.miniContainer}>
-        {/* Title field */}
+      {/* Title field */}
 
+      <div>
         <label className={styles.label} htmlFor="goal-title">
           Title
         </label>
@@ -55,8 +55,10 @@ export default function GoalForm({ onClose }) {
           placeholder="Enter goal title"
           required
         />
+      </div>
 
-        {/* Description textarea */}
+      {/* Description textarea */}
+      <div>
         <label className={styles.label} htmlFor="goal-desc">
           Description (Optional)
         </label>
@@ -68,110 +70,110 @@ export default function GoalForm({ onClose }) {
           rows={4}
           placeholder="Write a short description"
         />
+      </div>
 
-        {/* Category + Deadline row */}
-        <div className={styles.row}>
-          {/* Category dropdown (custom) */}
-          <div className={styles.dropdownWrapper}>
-            <label className={styles.label}>Category</label>
-            <div
-              className={styles.dropdown}
-              onClick={() => setCategoryOpen(!categoryOpen)}
+      {/* Category + Deadline row */}
+      <div className={styles.row}>
+        {/* Category dropdown (custom) */}
+        <div className={styles.dropdownWrapper}>
+          <label className={styles.label}>Category</label>
+          <div
+            className={styles.dropdown}
+            onClick={() => setCategoryOpen(!categoryOpen)}
+          >
+            <span className={styles.dropdownValue}>{selectedCategory}</span>
+            <span
+              className={`${styles.arrow} ${categoryOpen ? styles.open : ""}`}
             >
-              <span className={styles.dropdownValue}>{selectedCategory}</span>
-              <span
-                className={`${styles.arrow} ${categoryOpen ? styles.open : ""}`}
-              >
-                ▾
-              </span>
+              ▾
+            </span>
+          </div>
+
+          {/* Dropdown menu (simple) */}
+          {categoryOpen && (
+            <div className={styles.dropdownMenu}>
+              {CATEGORIES.map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  className={styles.dropdownItem}
+                  onClick={() => {
+                    setSelectedCategory(cat);
+                    setCategoryOpen(false);
+                  }}
+                >
+                  <span>{cat}</span>
+                  {selectedCategory === cat && (
+                    <span className={styles.check}>✔</span>
+                  )}
+                </button>
+              ))}
             </div>
-
-            {/* Dropdown menu (simple) */}
-            {categoryOpen && (
-              <div className={styles.dropdownMenu}>
-                {CATEGORIES.map((cat) => (
-                  <button
-                    key={cat}
-                    type="button"
-                    className={styles.dropdownItem}
-                    onClick={() => {
-                      setSelectedCategory(cat);
-                      setCategoryOpen(false);
-                    }}
-                  >
-                    <span>{cat}</span>
-                    {selectedCategory === cat && (
-                      <span className={styles.check}>✔</span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Deadline input */}
-          <div className={styles.deadlineWrapper}>
-            <label className={styles.label}>Deadline</label>
-            <div className={styles.dateInputWrapper}>
-              <input
-                type="date"
-                className={styles.dateInput}
-                value={deadline}
-                onChange={(e) => setDeadline(e.target.value)}
-                required
-              />
-              {/* <span className={styles.calendarIcon}>📅</span> */}
-            </div>
-          </div>
+          )}
         </div>
 
-        {/* Icon + Color pickers */}
-        <div>
-          <label className={styles.label}>Icon</label>
-          <div className={styles.iconGrid}>
-            {ICONS.map((ic) => (
-              <button
-                key={ic}
-                type="button"
-                className={`${styles.iconBtn} ${
-                  selectedIcon === ic ? styles.selected : ""
-                }`}
-                onClick={() => setSelectedIcon(ic)}
-                title={`Select ${ic}`}
-              >
-                <span className={styles.iconEmoji}>{ic}</span>
-              </button>
-            ))}
+        {/* Deadline input */}
+        <div className={styles.deadlineWrapper}>
+          <label className={styles.label}>Deadline</label>
+          <div className={styles.dateInputWrapper}>
+            <input
+              type="date"
+              className={styles.dateInput}
+              value={deadline}
+              onChange={(e) => setDeadline(e.target.value)}
+              required
+            />
+            {/* <span className={styles.calendarIcon}>📅</span> */}
           </div>
         </div>
+      </div>
 
-        <div>
-          <label className={styles.label}>Color</label>
-          <div className={styles.colorGrid}>
-            {COLORS.map((c) => (
-              <button
-                key={c}
-                type="button"
-                className={`${styles.colorSwatch} ${
-                  selectedColor === c ? styles.selectedColor : ""
-                }`}
-                onClick={() => setSelectedColor(c)}
-                style={{ background: c }}
-                aria-label={`Select color ${c}`}
-              />
-            ))}
-          </div>
+      {/* Icon + Color pickers */}
+      <div>
+        <label className={styles.label}>Icon</label>
+        <div className={styles.iconGrid}>
+          {ICONS.map((ic) => (
+            <button
+              key={ic}
+              type="button"
+              className={`${styles.iconBtn} ${
+                selectedIcon === ic ? styles.selected : ""
+              }`}
+              onClick={() => setSelectedIcon(ic)}
+              title={`Select ${ic}`}
+            >
+              <span className={styles.iconEmoji}>{ic}</span>
+            </button>
+          ))}
         </div>
+      </div>
 
-        {/* Action buttons: submit (save) and cancel */}
-        <div className={styles.actions}>
-          <button type="submit" className={styles.saveBtn}>
-            Save Goal
-          </button>
-          <button type="button" className={styles.cancelBtn} onClick={onClose}>
-            Cancel
-          </button>
+      <div>
+        <label className={styles.label}>Color</label>
+        <div className={styles.colorGrid}>
+          {COLORS.map((c) => (
+            <button
+              key={c}
+              type="button"
+              className={`${styles.colorSwatch} ${
+                selectedColor === c ? styles.selectedColor : ""
+              }`}
+              onClick={() => setSelectedColor(c)}
+              style={{ background: c }}
+              aria-label={`Select color ${c}`}
+            />
+          ))}
         </div>
+      </div>
+
+      {/* Action buttons: submit (save) and cancel */}
+      <div className={styles.actions}>
+        <button type="button" className={styles.cancelBtn} onClick={onClose}>
+          Cancel
+        </button>
+        <button type="submit" className={styles.createBtn}>
+          Create Goal
+        </button>
       </div>
     </form>
   );

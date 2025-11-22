@@ -104,13 +104,13 @@ export default function TabContent() {
       </div>
       {/* Modal component: re-usable small modal with backdrop */}
       {/* Modal wrapper: renders backdrop and a centered box. We pass a title
-          (e.g. "Add Goal" or "Create Habit") so the modal header shows it.
+          (e.g. "Create Goal" or "Create Habit") so the modal header shows it.
           The modal's children are the specific form components. */}
       <Modal
         open={modalOpen}
         onClose={closeModal}
-        title={`${modalAction === "add" ? "Add" : "Create"} ${
-          modalFor === "goals" ? "Goal" : "Habit"
+        title={`${modalAction === "add" ? "Create" : "Create"} ${
+          modalFor === "goals" ? "New Goal" : "New Habit"
         }`}
       >
         {/* Choose the right form based on `modalFor`. Each form gets `onClose`

@@ -9,13 +9,194 @@
   color: #374151;
 }
 
-.closeBtn {
-  align-self: flex-start;
-  background: transparent;
+.label {
+  display: block;
+  font-size: 1rem;
+  color: var(--color-gray-900);
+  font-weight: 500;
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  margin-bottom: 0.25rem;
+}
+
+.input {
+  width: 100%;
+  padding: 0.5rem 0;
   border: 1px solid #e5e7eb;
-  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  outline: none;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.textarea {
+  width: 100%;
+  padding: 0.5rem 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  outline: none;
+  font-size: 0.95rem;
+}
+
+/* For the dropdown */
+.dropdownWrapper {
+  position: relative;
+  flex: 1 1 0;
+}
+
+.dropdown {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid #e2e8f0;
   border-radius: 0.375rem;
   cursor: pointer;
+  background: var(--color-white);
+}
+
+.dropdownValue {
+  color: #111827;
+  font-weight: 600;
+}
+
+.arrow {
+  margin-left: 0.5rem;
+  transition: transform 0.15s;
+}
+
+.arrow.open {
+  transform: rotate(180deg);
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--color-white);
+  border: 1px solid #e6e9ef;
+  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.06);
+  border-radius: 0.5rem;
+  margin-top: 0.5rem;
+  z-index: 80;
+  overflow: hidden;
+}
+
+.dropdownItem {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0.55rem 0.75rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.dropdownItem:hover {
+  background: #f8fafc;
+}
+
+.check {
+  color: var(--color-gray-900);
+}
+
+/* Icons */
+
+.iconGrid {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.4rem;
+}
+
+.iconBtn {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s, border-color 0.12s;
+}
+
+.iconBtn:hover {
+  transform: scale(1.06);
+}
+
+.selected {
+  border: 2px solid var(--color-gray-900);
+  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.06);
+  transform: scale(1.08);
+}
+
+.iconEmoji {
+  font-size: 1.3rem;
+}
+
+.colorGrid {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.colorSwatch {
+  width: 45px;
+  height: 45px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.12s, border-color 0.12s;
+}
+
+.colorSwatch:hover {
+  transform: scale(1.06);
+}
+
+.selectedColor {
+  border-color: var(--color-gray-900);
+  transform: scale(1.08);
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  justify-content: space-between;
+}
+
+.createBtn {
+  background: var(--color-gray-900);
+  color: var(--color-white);
+  padding: 0.6rem 0.9rem;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-weight: 700;
+  width: 100%;
+  transition: background 0.3s ease;
+}
+
+.createBtn:hover {
+  background: var(--color-gray-700);
+}
+
+.cancelBtn {
+  background: transparent;
+  border: 1px solid #e5e7eb;
+  padding: 0.6rem 0.9rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.3s ease;
+}
+
+.cancelBtn:hover {
+  background: #f1f5f9;
 }
 
 @media (max-width: 420px) {
