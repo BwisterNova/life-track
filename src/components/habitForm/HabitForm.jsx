@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import styles from "./habitForm.module.css";
 
-export default function HabitForm({ onClose }) {
+// HabitForm supports an optional `onSave` callback that receives the
+// created habit object. `onClose` closes the modal.
+export default function HabitForm({ onClose, onSave }) {
   const FREQUENCY = ["Daily", "Weekly"];
 
   const COLORS = [
@@ -23,8 +25,56 @@ export default function HabitForm({ onClose }) {
   const [selectedIcon, setSelectedIcon] = useState(ICONS[0]);
   const [selectedColor, setSelectedColor] = useState(COLORS[0]);
 
+  // Ref to dropdown wrapper so clicking outside closes it (backdrop behavior)
+  const frequencyRef = useRef(null);
+
+  useEffect(() => {
+    function handleOutside(e) {
+      if (
+        frequencyOpen &&
+        frequencyRef.current &&
+        !frequencyRef.current.contains(e.target)
+      ) {
+        setFrequencyOpen(false);
+      }
+    }
+
+    function handleKey(e) {
+      if (e.key === "Escape") setFrequencyOpen(false);
+    }
+
+    document.addEventListener("mousedown", handleOutside);
+    document.addEventListener("touchstart", handleOutside);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("touchstart", handleOutside);
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [frequencyOpen]);
+
+  // Controlled inputs for habit name + description so we can submit data
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+
+  // Submit handler builds a habit object and calls onSave (if provided)
+  function handleSubmit(e) {
+    e?.preventDefault();
+    const newHabit = {
+      id: Date.now(),
+      name: name.trim() || "Untitled Habit",
+      description: description.trim(),
+      frequency: selectFrequency,
+      icon: selectedIcon,
+      color: selectedColor,
+      createdAt: new Date().toISOString(),
+    };
+    if (typeof onSave === "function") onSave(newHabit);
+    onClose();
+  }
+
   return (
-    <div className={styles.formContainer}>
+    <form className={styles.formContainer} onSubmit={handleSubmit}>
       <div>
         <div>
           <label className={styles.label} htmlFor="name">
@@ -36,6 +86,8 @@ export default function HabitForm({ onClose }) {
             className={styles.input}
             placeholder="Enter habit name"
             required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
           />
         </div>
 
@@ -49,16 +101,24 @@ export default function HabitForm({ onClose }) {
             cols="30"
             rows="3"
             placeholder="Add more details about your habit"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
           />
         </div>
 
-        <div className={styles.dropdownWrapper}>
+        <div className={styles.dropdownWrapper} ref={frequencyRef}>
+          {/* Frequency label + toggle. Clicking the box opens the menu */}
           <label className={styles.label} htmlFor="frequency">
             Frequency
           </label>
           <div
             className={styles.dropdown}
             onClick={() => setFrequencyOpen(!frequencyOpen)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) =>
+              e.key === "Enter" && setFrequencyOpen(!frequencyOpen)
+            }
           >
             <span className={styles.dropdownValue}>{selectFrequency}</span>
             <span
@@ -68,13 +128,13 @@ export default function HabitForm({ onClose }) {
             </span>
           </div>
 
-          {/* Frequency Dropdown */}
+          {/* Frequency Dropdown menu: use dropdownItem for items (previously used dropdownMenu for items). */}
           {frequencyOpen && (
             <div className={styles.dropdownMenu}>
               {FREQUENCY.map((cat) => (
                 <button
                   key={cat}
-                  className={styles.dropdownMenu}
+                  className={styles.dropdownItem}
                   type="button"
                   onClick={() => {
                     setSelectFrequency(cat);
@@ -141,6 +201,6 @@ export default function HabitForm({ onClose }) {
           </button>
         </div>
       </div>
-    </div>
+    </form>
   );
 }

@@ -3,11 +3,12 @@ import styles from "./tabContent.module.css";
 import Modal from "./Modal";
 import GoalForm from "../goalForm/GoalForm";
 import HabitForm from "../habitForm/HabitForm";
+import GoalCard from "../goalCard/GoalCard";
+import HabitCard from "../habitCard/HabitCard";
 
 export default function TabContent() {
   // Which tab is currently selected. We use 'goals' or 'habits'.
   // `activeTab` drives what the UI shows (title, messages, which Add/Create text to show).
-  // `setActiveTab` is the function we call to change it.
   const [activeTab, setActiveTab] = useState("goals");
 
   /* Modal state explained in simple terms:
@@ -27,10 +28,47 @@ export default function TabContent() {
     setModalOpen(true);
   }
 
-  // Close the modal (hide it). The modal component calls this when backdrop or close
-  // button is clicked. You can also call it from inside the form after submission.
+  // Close the modal (hide it).
+
   function closeModal() {
     setModalOpen(false);
+  }
+
+  // In-memory storage for created goals and habits. This is a simple demo
+  // implementation so created items show up immediately in the UI.
+  const [goals, setGoals] = useState([]);
+  const [habits, setHabits] = useState([]);
+
+  // Handlers passed to the forms via `onSave`.
+  function handleSaveGoal(newGoal) {
+    setGoals((s) => [newGoal, ...s]);
+    setActiveTab("goals");
+    closeModal();
+  }
+
+  function handleSaveHabit(newHabit) {
+    setHabits((s) => [newHabit, ...s]);
+    setActiveTab("habits");
+    closeModal();
+  }
+
+  // Card action handlers (delete / update progress / complete)
+  function handleDeleteGoal(id) {
+    setGoals((s) => s.filter((g) => g.id !== id));
+  }
+
+  function handleUpdateGoalProgress(id, newProgress) {
+    setGoals((s) =>
+      s.map((g) => (g.id === id ? { ...g, progress: newProgress } : g))
+    );
+  }
+
+  function handleCompleteGoal(id) {
+    setGoals((s) => s.map((g) => (g.id === id ? { ...g, progress: 100 } : g)));
+  }
+
+  function handleDeleteHabit(id) {
+    setHabits((s) => s.filter((h) => h.id !== id));
   }
 
   return (
@@ -64,9 +102,8 @@ export default function TabContent() {
         </button>
       </div>
 
-      {/* Content card for the selected tab */}
+      {/* Content for tab selected*/}
       <div className={styles.contentCard}>
-        {/* Header: title on left, add button on right */}
         <div className={styles.contentHeader}>
           {/* The title changes depending on which tab is active. */}
           <h2 className={styles.title}>
@@ -83,29 +120,58 @@ export default function TabContent() {
           </button>
         </div>
 
-        {/* Empty state shown when there are no items yet */}
-        <div className={styles.emptyState}>
-          {/* Empty state helpful message — different text per tab. */}
-          <p className={styles.emptyMessage}>
-            {activeTab === "goals"
-              ? "No goals yet. Create your first goal to get started!"
-              : "No habits yet. Create your first habit to start tracking!"}
-          </p>
-
-          {/* Create opens the same modal but we set action='create' so you can show
-              different labels or behavior inside the form if needed. */}
-          <button
-            className={styles.primaryButton}
-            onClick={() => openModal(activeTab, "create")}
+        {/* If the active tab has created items, render cards; otherwise show empty state */}
+        {activeTab === "goals" ? (
+          goals.length > 0 ? (
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
+            >
+              {goals.map((g) => (
+                <GoalCard
+                  key={g.id}
+                  goal={g}
+                  onDelete={handleDeleteGoal}
+                  onUpdateProgress={handleUpdateGoalProgress}
+                  onComplete={handleCompleteGoal}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className={styles.emptyState}>
+              <p className={styles.emptyMessage}>
+                No goals yet. Create your first goal to get started!
+              </p>
+              <button
+                className={styles.primaryButton}
+                onClick={() => openModal(activeTab, "create")}
+              >
+                + Create Goal
+              </button>
+            </div>
+          )
+        ) : habits.length > 0 ? (
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
           >
-            + Create {activeTab === "goals" ? "Goal" : "Habit"}
-          </button>
-        </div>
+            {habits.map((h) => (
+              <HabitCard key={h.id} habit={h} onDelete={handleDeleteHabit} />
+            ))}
+          </div>
+        ) : (
+          <div className={styles.emptyState}>
+            <p className={styles.emptyMessage}>
+              No habits yet. Create your first habit to start tracking!
+            </p>
+            <button
+              className={styles.primaryButton}
+              onClick={() => openModal(activeTab, "create")}
+            >
+              + Create Habit
+            </button>
+          </div>
+        )}
       </div>
-      {/* Modal component: re-usable small modal with backdrop */}
-      {/* Modal wrapper: renders backdrop and a centered box. We pass a title
-          (e.g. "Create Goal" or "Create Habit") so the modal header shows it.
-          The modal's children are the specific form components. */}
+      {/* Modal component pop modal for both habits and goals*/}
       <Modal
         open={modalOpen}
         onClose={closeModal}
@@ -116,9 +182,9 @@ export default function TabContent() {
         {/* Choose the right form based on `modalFor`. Each form gets `onClose`
             so it can close the modal after submit or when user cancels. */}
         {modalFor === "goals" ? (
-          <GoalForm onClose={closeModal} />
+          <GoalForm onClose={closeModal} onSave={handleSaveGoal} />
         ) : (
-          <HabitForm onClose={closeModal} />
+          <HabitForm onClose={closeModal} onSave={handleSaveHabit} />
         )}
       </Modal>
     </div>

@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import styles from "./goalForm.module.css";
 
 // GoalForm is the form UI placed inside the modal. It is self-contained and
 // focuses on UI only — you will add logic to save data later.
-export default function GoalForm({ onClose }) {
+// `onSave` is an optional callback the parent can pass to receive the
+// created goal object. We keep `onClose` so the modal can be closed.
+export default function GoalForm({ onClose, onSave }) {
   // Example options you asked for
   const CATEGORIES = [
     "Personal",
@@ -35,9 +37,57 @@ export default function GoalForm({ onClose }) {
   // Example submit handler stub — you'll replace with real save logic later.
   function handleSubmit(e) {
     e.preventDefault();
-    // For now just close the modal; later you'll validate & persist the data
+    // Build a simple goal object and send it to the parent via onSave.
+    // The parent (TabContent) will keep it in-memory and render a card.
+    const newGoal = {
+      id: Date.now(),
+      title: title.trim() || "Untitled Goal",
+      description: description.trim(),
+      category: selectedCategory,
+      icon: selectedIcon,
+      color: selectedColor,
+      deadline: deadline || null,
+      progress: 0,
+      createdAt: new Date().toISOString(),
+    };
+
+    if (typeof onSave === "function") onSave(newGoal);
+    // Close the modal after saving
     onClose();
   }
+
+  // Ref for the category dropdown wrapper so we can detect clicks outside
+  // and close the dropdown (backdrop-style behavior).
+  const categoryRef = useRef(null);
+
+  useEffect(() => {
+    // Handler will close dropdown when clicking/tapping outside it
+    function handleOutside(e) {
+      if (
+        categoryOpen &&
+        categoryRef.current &&
+        !categoryRef.current.contains(e.target)
+      ) {
+        setCategoryOpen(false);
+      }
+    }
+
+    // Support mouse and touch start events
+    document.addEventListener("mousedown", handleOutside);
+    document.addEventListener("touchstart", handleOutside);
+
+    // Also close with Escape key for accessibility
+    function handleKey(e) {
+      if (e.key === "Escape") setCategoryOpen(false);
+    }
+    document.addEventListener("keydown", handleKey);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("touchstart", handleOutside);
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [categoryOpen]);
 
   return (
     <form className={styles.formContainer} onSubmit={handleSubmit}>
@@ -74,12 +124,21 @@ export default function GoalForm({ onClose }) {
 
       {/* Category + Deadline row */}
       <div className={styles.row}>
-        {/* Category dropdown (custom) */}
-        <div className={styles.dropdownWrapper}>
+        {/* Category dropdown (custom)
+            - Uses a ref + document listeners to implement backdrop-style
+              behavior: clicking anywhere outside will close the open menu.
+            - The toggler is keyboard-accessible (role/button + Enter key).
+        */}
+        <div className={styles.dropdownWrapper} ref={categoryRef}>
           <label className={styles.label}>Category</label>
           <div
             className={styles.dropdown}
             onClick={() => setCategoryOpen(!categoryOpen)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) =>
+              e.key === "Enter" && setCategoryOpen(!categoryOpen)
+            }
           >
             <span className={styles.dropdownValue}>{selectedCategory}</span>
             <span

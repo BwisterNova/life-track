@@ -4,6 +4,15 @@
   gap: 0.75rem;
 }
 
+/* NOTE:
+ - Inputs and textareas use `box-sizing: border-box` so padding is
+   included in the element width and won't overflow the container.
+ - The frequency dropdown is closed by a JS click-outside handler
+   implemented in `HabitForm.jsx` — clicking anywhere outside the
+   dropdown will close it (backdrop-style). The dropdown menu below
+   is scrollable on small screens.
+*/
+
 .placeholder {
   margin: 0;
   color: #374151;
@@ -21,21 +30,23 @@
 
 .input {
   width: 100%;
-  padding: 0.5rem 0;
+  padding: 0.5rem 0.75rem;
   border: 1px solid #e5e7eb;
   border-radius: 0.5rem;
   outline: none;
   font-size: 14px;
   font-weight: 400;
+  box-sizing: border-box;
 }
 
 .textarea {
   width: 100%;
-  padding: 0.5rem 0;
+  padding: 0.5rem 0.75rem;
   border: 1px solid #e5e7eb;
   border-radius: 0.375rem;
   outline: none;
   font-size: 0.95rem;
+  box-sizing: border-box;
 }
 
 /* For the dropdown */
@@ -80,7 +91,8 @@
   border-radius: 0.5rem;
   margin-top: 0.5rem;
   z-index: 80;
-  overflow: hidden;
+  overflow: auto;
+  max-height: 220px;
 }
 
 .dropdownItem {
@@ -202,5 +214,9 @@
 @media (max-width: 420px) {
   .formContainer {
     gap: 0.5rem;
+  }
+  /* Make dropdown and inputs comfortable on narrow screens */
+  .dropdown {
+    padding: 0.45rem 0.6rem;
   }
 }

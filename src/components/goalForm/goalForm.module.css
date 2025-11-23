@@ -4,6 +4,17 @@
   gap: 0.75rem;
 }
 
+/* NOTE:
+ - Inputs/textarea use `box-sizing: border-box` so horizontal padding
+   does not cause overflow. This matches the JS behavior where inputs
+   are `width:100%` and should remain inside their container at all
+   viewport sizes.
+ - The dropdown uses a JS click-outside handler (see `GoalForm.jsx`) to
+   implement backdrop-style closing: clicking anywhere outside the menu
+   will close it. The CSS below ensures the menu overlays properly and
+   becomes scrollable on small screens.
+*/
+
 .miniContainer {
   max-width: 500px;
 }
@@ -41,11 +52,12 @@
 
 .input {
   width: 100%;
-  padding: 0.6rem 0;
+  padding: 0.6rem 0.75rem;
   border: 1px solid #e5e7eb;
   border-radius: 0.5rem;
   outline: none;
   font-size: 1rem;
+  box-sizing: border-box;
 }
 
 .textarea {
@@ -55,6 +67,7 @@
   border-radius: 0.375rem;
   outline: none;
   font-size: 0.95rem;
+  box-sizing: border-box;
 }
 
 .row {
@@ -72,11 +85,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.55rem 0;
+  padding: 0.55rem 0.75rem;
   border: 1px solid #e5e7eb;
   border-radius: 0.375rem;
   cursor: pointer;
   background: var(--color-white);
+  box-sizing: border-box;
 }
 
 .dropdownValue {
@@ -104,7 +118,9 @@
   border-radius: 0.5rem;
   margin-top: 0.5rem;
   z-index: 80;
-  overflow: hidden;
+  /* allow scrolling if there are many items or on small screens */
+  overflow: auto;
+  max-height: 240px;
 }
 
 .dropdownItem {
@@ -136,9 +152,10 @@
 
 .dateInput {
   width: 100%;
-  padding: 0.55rem 0;
+  padding: 0.55rem 0.75rem;
   border: 1px solid #e5e7eb;
   border-radius: 0.375rem;
+  box-sizing: border-box;
 }
 
 /* .calendarIcon {
