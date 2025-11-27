@@ -15,7 +15,11 @@ export default function GoalCard({
 }) {
   if (!goal) return null;
 
-  // Helpers to compute status text/class based on progress & deadline
+  // Helpers to compute status text/class based on progress & deadline.
+  // Rules:
+  // - If progress >= 100 => Completed
+  // - Else if deadline exists and is in the past => Overdue
+  // - Otherwise => In Progress
   function getStatusText() {
     if (goal.progress >= 100) return "Completed";
     if (goal.deadline && new Date(goal.deadline) < new Date()) return "Overdue";
@@ -101,7 +105,7 @@ export default function GoalCard({
           </div>
         </div>
 
-        {goal.status !== "completed" && (
+        {getStatusText() !== "Completed" && (
           <div className={styles.buttonGroup}>
             <button
               className={styles.progressButton}
@@ -114,14 +118,6 @@ export default function GoalCard({
             >
               +10%
             </button>
-            {goal.progress >= 100 && (
-              <button
-                className={styles.completeButton}
-                onClick={() => onComplete(goal.id)}
-              >
-                ✓ Mark Complete
-              </button>
-            )}
           </div>
         )}
       </div>

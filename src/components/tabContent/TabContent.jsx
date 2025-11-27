@@ -38,10 +38,20 @@ export default function TabContent() {
   // implementation so created items show up immediately in the UI.
   const [goals, setGoals] = useState([]);
   const [habits, setHabits] = useState([]);
+  // Temporary holder for the goal being edited (passed to GoalForm as initialGoal)
+  const [editingGoal, setEditingGoal] = useState(null);
 
   // Handlers passed to the forms via `onSave`.
   function handleSaveGoal(newGoal) {
-    setGoals((s) => [newGoal, ...s]);
+    // If the incoming goal id already exists, update that goal (edit flow),
+    // otherwise treat this as a new goal and prepend it to the list.
+    setGoals((s) => {
+      const exists = s.find((g) => g.id === newGoal.id);
+      if (exists) {
+        return s.map((g) => (g.id === newGoal.id ? { ...g, ...newGoal } : g));
+      }
+      return [newGoal, ...s];
+    });
     setActiveTab("goals");
     closeModal();
   }
@@ -69,6 +79,19 @@ export default function TabContent() {
 
   function handleDeleteHabit(id) {
     setHabits((s) => s.filter((h) => h.id !== id));
+  }
+
+  // Open the modal to edit an existing goal. We find the goal and pass it
+  // into `GoalForm` via `initialGoal` so the form is pre-populated.
+  function handleEditGoal(id) {
+    const g = goals.find((x) => x.id === id);
+    if (!g) return;
+    // Open modal for editing with that goal
+    setModalFor("goals");
+    setModalAction("edit");
+    setModalOpen(true);
+    // store the goal to be edited in a temporary ref state (we'll pass it to the form)
+    setEditingGoal(g);
   }
 
   return (
@@ -133,6 +156,7 @@ export default function TabContent() {
                   onDelete={handleDeleteGoal}
                   onUpdateProgress={handleUpdateGoalProgress}
                   onComplete={handleCompleteGoal}
+                  onEdit={handleEditGoal}
                 />
               ))}
             </div>
@@ -182,7 +206,11 @@ export default function TabContent() {
         {/* Choose the right form based on `modalFor`. Each form gets `onClose`
             so it can close the modal after submit or when user cancels. */}
         {modalFor === "goals" ? (
-          <GoalForm onClose={closeModal} onSave={handleSaveGoal} />
+          <GoalForm
+            onClose={closeModal}
+            onSave={handleSaveGoal}
+            initialGoal={modalAction === "edit" ? editingGoal : null}
+          />
         ) : (
           <HabitForm onClose={closeModal} onSave={handleSaveHabit} />
         )}

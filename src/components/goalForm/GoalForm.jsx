@@ -5,7 +5,16 @@ import styles from "./goalForm.module.css";
 // focuses on UI only — you will add logic to save data later.
 // `onSave` is an optional callback the parent can pass to receive the
 // created goal object. We keep `onClose` so the modal can be closed.
-export default function GoalForm({ onClose, onSave }) {
+// `initialGoal` (optional): when provided the form will be populated and
+// submitting will behave like an edit (the same `onSave` callback receives
+// the object with the same `id`).
+//
+// NOTE (responsiveness): inputs and textarea use the CSS rule
+// `box-sizing: border-box` (see `goalForm.module.css`) so horizontal padding
+// is counted inside `width: 100%`. This prevents padding from causing the
+// controls to overflow their parent container when you add left/right
+// padding — you can safely tune `padding` in CSS without breaking layout.
+export default function GoalForm({ onClose, onSave, initialGoal = null }) {
   // Example options you asked for
   const CATEGORIES = [
     "Personal",
@@ -34,21 +43,43 @@ export default function GoalForm({ onClose, onSave }) {
   const [selectedIcon, setSelectedIcon] = useState(ICONS[0]);
   const [selectedColor, setSelectedColor] = useState(COLORS[0]);
 
+  // If `initialGoal` is provided we populate form state with its values so
+  // the same form can be used for editing. `useEffect` ensures the form is
+  // updated if a different initialGoal is provided later.
+  useEffect(() => {
+    if (initialGoal) {
+      setTitle(initialGoal.title || "");
+      setDescription(initialGoal.description || "");
+      setSelectedCategory(initialGoal.category || CATEGORIES[0]);
+      setDeadline(initialGoal.deadline || "");
+      setSelectedIcon(initialGoal.icon || ICONS[0]);
+      setSelectedColor(initialGoal.color || COLORS[0]);
+    }
+  }, [initialGoal]);
+
   // Example submit handler stub — you'll replace with real save logic later.
   function handleSubmit(e) {
     e.preventDefault();
     // Build a simple goal object and send it to the parent via onSave.
     // The parent (TabContent) will keep it in-memory and render a card.
+    // Preserve id when editing; otherwise create a new id for new goal
     const newGoal = {
-      id: Date.now(),
+      id: initialGoal && initialGoal.id ? initialGoal.id : Date.now(),
       title: title.trim() || "Untitled Goal",
       description: description.trim(),
       category: selectedCategory,
       icon: selectedIcon,
       color: selectedColor,
       deadline: deadline || null,
-      progress: 0,
-      createdAt: new Date().toISOString(),
+      // If editing, preserve existing progress; otherwise start at 0
+      progress:
+        initialGoal && typeof initialGoal.progress === "number"
+          ? initialGoal.progress
+          : 0,
+      createdAt:
+        initialGoal && initialGoal.createdAt
+          ? initialGoal.createdAt
+          : new Date().toISOString(),
     };
 
     if (typeof onSave === "function") onSave(newGoal);
