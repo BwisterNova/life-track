@@ -32,12 +32,11 @@ export default function GoalCard({
     return "inProgress";
   }
 
+  // Use the user's locale to display a numeric date (e.g. 11/27/2025)
+  // `toLocaleDateString()` will adapt to the user's region and will show
+  // a numeric date format rather than a short-month form.
   const formattedDeadline = goal.deadline
-    ? new Date(goal.deadline).toLocaleDateString(undefined, {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      })
+    ? new Date(goal.deadline).toLocaleDateString(undefined)
     : "-";
   return (
     <motion.div

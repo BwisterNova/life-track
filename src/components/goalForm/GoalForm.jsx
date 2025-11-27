@@ -39,7 +39,13 @@ export default function GoalForm({ onClose, onSave, initialGoal = null }) {
   const [description, setDescription] = useState("");
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(CATEGORIES[0]);
-  const [deadline, setDeadline] = useState(""); // we'll use type=date so browser helps
+  // Default deadline to today's date (ISO yyyy-mm-dd) so the date input
+  // shows the user's current date by default and updates daily when the
+  // page is reloaded. This prevents the empty "mm/dd/yyyy" placeholder
+  // and gives a sensible default the user can change.
+  const [deadline, setDeadline] = useState(() =>
+    new Date().toISOString().slice(0, 10)
+  ); // yyyy-mm-dd
   const [selectedIcon, setSelectedIcon] = useState(ICONS[0]);
   const [selectedColor, setSelectedColor] = useState(COLORS[0]);
 
@@ -51,7 +57,14 @@ export default function GoalForm({ onClose, onSave, initialGoal = null }) {
       setTitle(initialGoal.title || "");
       setDescription(initialGoal.description || "");
       setSelectedCategory(initialGoal.category || CATEGORIES[0]);
-      setDeadline(initialGoal.deadline || "");
+      // If the initial goal has a deadline, try to normalize it to yyyy-mm-dd
+      // so the date input displays a proper value. If not provided, keep
+      // the default of today's date.
+      setDeadline(
+        initialGoal.deadline
+          ? new Date(initialGoal.deadline).toISOString().slice(0, 10)
+          : new Date().toISOString().slice(0, 10)
+      );
       setSelectedIcon(initialGoal.icon || ICONS[0]);
       setSelectedColor(initialGoal.color || COLORS[0]);
     }

@@ -202,6 +202,12 @@
   color: var(--color-white);
 }
 
+/* The statusBadge classes below correspond to getStatusText() results:
+   - .completed -> shows when progress >= 100
+   - .overdue   -> shows when deadline passed and progress < 100
+   - .inProgress-> default active state
+*/
+
 .statusBadge.completed {
   background: #10b981;
 }

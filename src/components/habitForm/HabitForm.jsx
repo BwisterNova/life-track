@@ -3,7 +3,10 @@ import styles from "./habitForm.module.css";
 
 // HabitForm supports an optional `onSave` callback that receives the
 // created habit object. `onClose` closes the modal.
-export default function HabitForm({ onClose, onSave }) {
+// `initialHabit` (optional): if provided the form will be populated and
+// submitting will update the existing habit (edit). `onSave` receives the
+// created/updated habit object.
+export default function HabitForm({ onClose, onSave, initialHabit = null }) {
   const FREQUENCY = ["Daily", "Weekly"];
 
   const COLORS = [
@@ -24,6 +27,17 @@ export default function HabitForm({ onClose, onSave }) {
   // Color + Icon
   const [selectedIcon, setSelectedIcon] = useState(ICONS[0]);
   const [selectedColor, setSelectedColor] = useState(COLORS[0]);
+
+  // If editing, populate form fields from initialHabit
+  useEffect(() => {
+    if (initialHabit) {
+      setName(initialHabit.name || "");
+      setDescription(initialHabit.description || "");
+      setSelectFrequency(initialHabit.frequency || FREQUENCY[0]);
+      setSelectedIcon(initialHabit.icon || ICONS[0]);
+      setSelectedColor(initialHabit.color || COLORS[0]);
+    }
+  }, [initialHabit]);
 
   // Ref to dropdown wrapper so clicking outside closes it (backdrop behavior)
   const frequencyRef = useRef(null);
@@ -61,13 +75,17 @@ export default function HabitForm({ onClose, onSave }) {
   function handleSubmit(e) {
     e?.preventDefault();
     const newHabit = {
-      id: Date.now(),
+      // preserve id when editing
+      id: initialHabit && initialHabit.id ? initialHabit.id : Date.now(),
       name: name.trim() || "Untitled Habit",
       description: description.trim(),
       frequency: selectFrequency,
       icon: selectedIcon,
       color: selectedColor,
-      createdAt: new Date().toISOString(),
+      createdAt:
+        initialHabit && initialHabit.createdAt
+          ? initialHabit.createdAt
+          : new Date().toISOString(),
     };
     if (typeof onSave === "function") onSave(newHabit);
     onClose();

@@ -40,6 +40,8 @@ export default function TabContent() {
   const [habits, setHabits] = useState([]);
   // Temporary holder for the goal being edited (passed to GoalForm as initialGoal)
   const [editingGoal, setEditingGoal] = useState(null);
+  // Temporary holder for habit being edited
+  const [editingHabit, setEditingHabit] = useState(null);
 
   // Handlers passed to the forms via `onSave`.
   function handleSaveGoal(newGoal) {
@@ -79,6 +81,15 @@ export default function TabContent() {
 
   function handleDeleteHabit(id) {
     setHabits((s) => s.filter((h) => h.id !== id));
+  }
+
+  function handleEditHabit(id) {
+    const h = habits.find((x) => x.id === id);
+    if (!h) return;
+    setModalFor("habits");
+    setModalAction("edit");
+    setModalOpen(true);
+    setEditingHabit(h);
   }
 
   // Open the modal to edit an existing goal. We find the goal and pass it
@@ -178,7 +189,12 @@ export default function TabContent() {
             style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
           >
             {habits.map((h) => (
-              <HabitCard key={h.id} habit={h} onDelete={handleDeleteHabit} />
+              <HabitCard
+                key={h.id}
+                habit={h}
+                onDelete={handleDeleteHabit}
+                onEdit={handleEditHabit}
+              />
             ))}
           </div>
         ) : (
@@ -212,7 +228,11 @@ export default function TabContent() {
             initialGoal={modalAction === "edit" ? editingGoal : null}
           />
         ) : (
-          <HabitForm onClose={closeModal} onSave={handleSaveHabit} />
+          <HabitForm
+            onClose={closeModal}
+            onSave={handleSaveHabit}
+            initialHabit={modalAction === "edit" ? editingHabit : null}
+          />
         )}
       </Modal>
     </div>
