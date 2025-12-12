@@ -2,36 +2,14 @@ import styles from "./stats.module.css";
 import { Target, TrendingUp, Flame, Award } from "lucide-react";
 import { motion } from "framer-motion";
 
-export default function Stats({ stats }) {
+export default function Stats({ stats = {} }) {
+  const { totalGoals = 0, completionRate = "0%", currentStreak = "0 days", completed = 0 } = stats;
+
   const statCards = [
-    {
-      title: "Total Goals",
-      // value: stats.totalGoals,
-      value: "0",
-      icon: Target,
-      colorClass: "blue",
-    },
-    {
-      title: "Completion Rate",
-      // value: `${stats.completionRate}%`,
-      value: "0%",
-      icon: TrendingUp,
-      colorClass: "green",
-    },
-    {
-      title: "Current Streak",
-      // value: `${stats.currentStreak} days`,
-      value: "0 days",
-      icon: Flame,
-      colorClass: "orange",
-    },
-    {
-      title: "Completed",
-      // value: stats.completedGoals,
-      value: "0",
-      icon: Award,
-      colorClass: "purple",
-    },
+    { title: "Total Goals", value: String(totalGoals), icon: Target, colorClass: "blue" },
+    { title: "Completion Rate", value: String(completionRate), icon: TrendingUp, colorClass: "green" },
+    { title: "Current Streak", value: String(currentStreak), icon: Flame, colorClass: "orange" },
+    { title: "Completed", value: String(completed), icon: Award, colorClass: "purple" },
   ];
 
   return (

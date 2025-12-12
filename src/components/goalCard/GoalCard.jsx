@@ -36,7 +36,11 @@ export default function GoalCard({
   // `toLocaleDateString()` will adapt to the user's region and will show
   // a numeric date format rather than a short-month form.
   const formattedDeadline = goal.deadline
-    ? new Date(goal.deadline).toLocaleDateString(undefined)
+    ? new Date(goal.deadline).toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
     : "-";
   return (
     <motion.div
@@ -98,7 +102,9 @@ export default function GoalCard({
               <Calendar className={styles.footerIcon} />
               <span>{formattedDeadline}</span>
             </div>
-            <span className={`${styles.statusBadge} ${getStatusClass()}`}>
+            <span
+              className={`${styles.statusBadge} ${styles[getStatusClass()]}`}
+            >
               {getStatusText()}
             </span>
           </div>
